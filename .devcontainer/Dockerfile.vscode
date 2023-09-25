@@ -1,0 +1,54 @@
+FROM ubuntu:22.04
+
+ARG USERNAME=developer
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV BAZEL_ENVIRONMENT="dev"
+
+RUN apt update && apt install -y --no-install-recommends \
+    wget \
+    ca-certificates \
+    gnupg2 \
+    gpg-agent \  
+    locales \
+    git \
+    curl \
+    unzip 
+
+# Adding apt repositories for LLVM
+RUN echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main" \
+    "deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main" \
+    > /etc/apt/sources.list.d/llvm.list && \
+    wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+
+RUN apt update && apt install -y --no-install-recommends \ 
+    jq \
+    sudo \
+    libgtest-dev \  
+    python3.10 \
+    python3-pip \
+    clang-format \
+    clang-17 \
+    patch \
+    openssh-client \
+    clang-tidy \
+    uncrustify \
+    file
+
+RUN pip3 install pre-commit
+
+RUN if [ "$(arch)" = "x86_64" ]; then \
+    wget https://github.com/bazelbuild/bazelisk/releases/download/v1.16.0/bazelisk-linux-amd64 -O /usr/local/bin/bazel; \
+    else \
+    wget https://github.com/bazelbuild/bazelisk/releases/download/v1.16.0/bazelisk-linux-arm64 -O /usr/local/bin/bazel; \
+    fi && \
+    chmod +x /usr/local/bin/bazel;
+
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -ms /bin/bash $USERNAME \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME
+
+USER developer

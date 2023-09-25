@@ -1,0 +1,27 @@
+cc_library(
+    name = "hello-test-lib",
+    srcs = ["hello.cpp"],
+    hdrs = ["hello.hpp"],
+    deps = [
+        "//protos:hello_cc_grpc",
+    ],
+)
+
+cc_binary(
+    name = "hello-test-bin",
+    srcs = ["main.cpp"],
+    deps = [
+        ":hello-test-lib",
+    ],
+)
+
+cc_test(
+    name = "hello_test",
+    srcs = ["hello_test.cpp"],
+
+    deps = [
+        ":hello-test-lib",
+        "@com_google_googletest//:gtest"
+    ],
+    linkstatic = True,
+)

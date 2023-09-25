@@ -1,0 +1,30 @@
+repos:
+  - repo: 'https://github.com/pre-commit/pre-commit-hooks'
+    rev: v3.4.0
+    hooks:
+      - id: trailing-whitespace
+        args:
+          - '--markdown-linebreak-ext=md,txt'
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: detect-aws-credentials
+      - id: check-case-conflict
+      - id: check-merge-conflict
+  - repo: https://github.com/pocc/pre-commit-hooks
+    rev: master
+    hooks:
+      - id: clang-format
+        args: [--style=Google]
+      - id: clang-tidy
+      - id: uncrustify
+
+  - repo: local
+    hooks:
+      - id: buildifier
+        name: Format w/ buildifier
+        description: Runs `buildifier` on Bazel files
+        entry: ./ci/check-buildifier.sh
+        language: system
+        files: ^(.*/)?(BUILD\.bazel|BUILD)$|\.bzl$|^WORKSPACE$

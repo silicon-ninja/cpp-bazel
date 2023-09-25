@@ -1,0 +1,73 @@
+workspace(name = "cpp-bazel-test")
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+HERMETIC_CC_TOOLCHAIN_VERSION = "v2.1.0"
+
+http_archive(
+    name = "hermetic_cc_toolchain",
+    sha256 = "892b0dd7aa88c3504a8821e65c44fd22f32c16afab12d89e9942fff492720b37",
+    urls = [
+        "https://mirror.bazel.build/github.com/uber/hermetic_cc_toolchain/releases/download/{0}/hermetic_cc_toolchain-{0}.tar.gz".format(HERMETIC_CC_TOOLCHAIN_VERSION),
+        "https://github.com/uber/hermetic_cc_toolchain/releases/download/{0}/hermetic_cc_toolchain-{0}.tar.gz".format(HERMETIC_CC_TOOLCHAIN_VERSION),
+    ],
+)
+
+load("@hermetic_cc_toolchain//toolchain:defs.bzl", zig_toolchains = "toolchains")
+
+zig_toolchains()
+
+register_toolchains(
+    "@zig_sdk//toolchain:linux_amd64_gnu.2.28",
+    "@zig_sdk//toolchain:linux_arm64_gnu.2.28",
+    "@zig_sdk//toolchain:darwin_amd64",
+    "@zig_sdk//toolchain:darwin_arm64",
+    "@zig_sdk//toolchain:windows_amd64",
+    "@zig_sdk//toolchain:windows_arm64",
+)
+
+http_archive(
+  name = "com_google_googletest",
+  sha256 = "755f9a39bc7205f5a0c428e920ddad092c33c8a1b46997def3f1d4a82aded6e1",
+  urls = ["https://github.com/google/googletest/archive/5ab508a01f9eb089207ee87fd547d290da39d015.zip"],
+  strip_prefix = "googletest-5ab508a01f9eb089207ee87fd547d290da39d015",
+)
+
+http_archive(
+    name = "com_github_google_glog",
+    sha256 = "122fb6b712808ef43fbf80f75c52a21c9760683dae470154f02bddfc61135022",
+    strip_prefix = "glog-0.6.0",
+    urls = ["https://github.com/google/glog/archive/v0.6.0.zip"],
+)
+
+http_archive(
+    name = "rules_proto_grpc",
+    sha256 = "9ba7299c5eb6ec45b6b9a0ceb9916d0ab96789ac8218269322f0124c0c0d24e2",
+    strip_prefix = "rules_proto_grpc-4.5.0",
+    urls = ["https://github.com/rules-proto-grpc/rules_proto_grpc/releases/download/4.5.0/rules_proto_grpc-4.5.0.tar.gz"],
+)
+
+load("@rules_proto_grpc//:repositories.bzl", "rules_proto_grpc_toolchains", "rules_proto_grpc_repos")
+
+rules_proto_grpc_toolchains()
+
+rules_proto_grpc_repos()
+
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
+
+rules_proto_dependencies()
+
+rules_proto_toolchains()
+
+load("@rules_proto_grpc//cpp:repositories.bzl", rules_proto_grpc_cpp_repos = "cpp_repos")
+
+rules_proto_grpc_cpp_repos()
+
+load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
+
+grpc_deps()
+
+load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
+
+grpc_extra_deps()
